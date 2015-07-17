@@ -1,0 +1,7 @@
+name = APIario Drupal
+description = Inserção e tratamento de arquivos via APIario do AoVivoNaWeb.tv
+core = 7.x
+package = APIario
+files[] = apiario.install
+files[] = apiario.module
+configure = admin/config/apiario/settings

@@ -1,0 +1,163 @@
+<?php
+/**
+ * Módulo APIario para envio de vídeos e tratamento dos mesmos
+ * @author Anderson Silva
+ * @version 1.0
+ **/
+
+require_once('apiario.oauth');
+require_once('apiario.functions');
+
+//Define a URL de retorno para autenticação com a APIario
+define('REDIRECT_URI', 'http://' . $_SERVER['HTTP_HOST'] . '/admin/config/apiario/settings');
+//Define a URL da APIario para autorização
+const AUTHORIZATION_ENDPOINT = 'http://colmeia.aovivonaweb.tv/oauth/authorise';
+//Define a URL da APIario para receber o token
+const TOKEN_ENDPOINT         = 'http://colmeia.aovivonaweb.tv/oauth/token';
+//Formato
+const ACCESS_TOKEN_BEARER   = 1;
+
+/**
+ * Implementar hook_form() com o formulário padrão standard.
+ */
+function apiario_form($node, $form_state) {
+  return node_content_form($node, $form_state);
+}
+
+/**
+ * Implementar hook_form_alter().
+ * @param $form
+ * @param $form_state
+ * @param $form_id
+ * @return array
+ */
+function apiario_form_alter(&$form, &$form_state, $form_id) {
+  //Esta não é a forma que estamos procurando
+  if ($form_id != 'apiario_node_form') return;
+
+  //Pega o access token salvo
+  $access_token = variable_get('apiario_accesstoken','');
+
+  //Verifica se foi setado no drupal ou está vazio
+  if($access_token != '') {
+    $access_token = checkAccessToken($access_token);
+  } else {
+
+    //Mensagem para o usuário para configurar o módulo
+    drupal_set_message(t('Primeiro você precisa configurar e habilitar o módulo nas configurações. <a href="/admin/config/apiario/settings">Clique aqui para configurar</a>'), 'error');   
+
+    //Desabilita os campos e botões de envio
+    $form['title'] = '';
+    $form['body'] = '';
+    $form['apiario_codigo'] = '';
+    $form['actions'] = '';
+    return $form;
+  }
+
+  //Removendo o botão de visualização
+  $form['actions']['preview'] = '';
+  //Desabilita o status do Node
+  $form['options']['status']['#default_value'] = 0;
+  $form['options']['status']['#disabled'] = TRUE;
+  $form['options']['status']['#title'] = 'Publicação somente após o retorno da APIario';
+
+  //Configurando o campo código  
+  $form['apiario_codigo']['und'][0]['value']['#description'] = t('Código de retorno do envio do vídeo');
+  $form['apiario_codigo']['und'][0]['value']['#attributes'] = array('readonly' => 'readonly');
+
+  //Configurando o campo status
+  $form['apiario_status']['und'][0]['value']['#description'] = t('Status do vídeo na APIario');
+  $form['apiario_status']['und'][0]['value']['#attributes'] = array('readonly' => 'readonly');
+
+  //Anexa o css do módulo
+  $form['#attached']['css'] = array(
+    drupal_get_path('module', 'ajax_example') . 'modules/apiariodrupal/stylesheets/apiario.css'
+  );
+  //Anexa o JS do módulo
+  $form['#attached']['js'] = array(
+    drupal_get_path('module', 'apiario') . '/javascripts/jquery-1.9.1.min.js',
+    drupal_get_path('module', 'apiario') . '/javascripts/script.js',
+  ); 
+  //Attributos do formulário
+  $form['#attributes'] = array('enctype' => "multipart/form-data"); 
+
+  //Verifica se existe um código de retorno
+  if (!isset($form['apiario_codigo']['und']['0']['value']['#default_value']) && (!isset($_POST['apiario_codigo']['und'][0]['value']))) {
+    //Insere o campo vídeo para ser enviado
+    $form['video'] = array(
+      '#type' => 'file',
+      '#title' => 'Escolha o vídeo a ser enviado'     
+    );    
+  } else {
+    drupal_set_message(t('O Código do envio do vídeo foi recebido com sucesso!'));
+  }
+  //Adiciona o campo access token
+  $form['access_token'] = array(
+    '#type' => 'hidden',
+    '#value' => variable_get('apiario_accesstoken',''),
+    '#attributes' => array (
+      'class' => array('apiario_accesstoken')
+    )
+  );
+}
+
+/**
+ * Implementando hook_menu().
+ */
+function apiario_menu()  {
+  
+  // Criando a área administrativa
+  $items['admin/config/apiario'] = array(
+    'title' => 'APIario Administrar',
+    'description' => 'Administrar as configurações da APIario',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+    'access arguments' => array('administer nodes'),
+  );
+  
+  // Adicionar as configurações
+  $items['admin/config/apiario/settings'] = array(
+    'title' => 'APIario Configurações',
+    'description' => 'Configurações do módulo APIario',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('apiario_config_form'),
+    'file' => 'apiario.admin',
+    'access arguments' => array('administer nodes'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  
+  return $items;
+}
+
+/**
+ * Desabilita o modo Overlay AJAX das configurações
+ * @return array
+ **/
+function apiario_admin_paths() {
+  $paths = array(
+    'admin/config/apiario/settings' => FALSE,
+  );
+  return $paths;
+}
+
+/**
+ * Implementando hook_node_info()
+ * @return array
+ */
+function apiario_node_info() {
+  $items['apiario'] = array(
+    'name' => t('Vídeos APIario'),
+    'type' => 'apiario',
+    'base' => 'node_content',
+    'description' => t('Fazer upload de vídeos pela APIario'),
+    'has_title' => '1',
+    'title_label' => t('Título do vídeo'),
+    'body_label' => t('Simples descrição do vídeo'),
+    'help' => t('Por favor preencha todos os campos.'),
+  );
+  
+  return $items;
+}

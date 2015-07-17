@@ -1,0 +1,89 @@
+<?php
+/**
+ * Arquivo onde fica a área administrativa do módulo
+ * @author Anderson Silva
+ * @version 1.0
+ **/
+
+/**
+ * Formulário das configurações da API
+ **/
+function apiario_config_form() {
+  $client = getClient();
+  //Verifica o retorno da APIario com o code para salvar o access token
+  if (isset($_GET['code'])) {
+    //Parâmetros para solicitar o access token
+    $params = array('code' => $_GET['code'], 'redirect_uri' => REDIRECT_URI);
+    //Solicita o access token usando o código de autorização
+    $response = $client->getAccessToken(TOKEN_ENDPOINT, 'authorization_code', $params);
+    //Pega o resultado
+    $info = $response['result'];
+    if($info != "Error") {
+      variable_set('apiario_accesstoken', $info['access_token']);
+      variable_set('apiario_refreshtoken', $info['refresh_token']);
+      drupal_set_message(t('Access Token salvo com sucesso!'));
+    } else {
+      //drupal_set_message(t('O código de autorização expirou, tente novamente salvando.'), 'error');
+    }
+  }
+
+  $form = array();
+  // configuração inicial do módulo
+  $form['config_inicial'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configuração Inicial'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE
+  );
+
+  $form['config_inicial']['apiario_clientid'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Client Id'),
+    '#default_value' => variable_get('apiario_clientid',''),
+    '#size' => 60,
+    '#description' => t("Informe o client id informado pela APIario"),
+    '#required' => TRUE,
+  );
+  $form['config_inicial']['apiario_clientsecret'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Client Secret'),
+    '#default_value' => variable_get('apiario_clientsecret', ''),
+    '#size' => 60,
+    '#required' => TRUE,
+    '#description' => t('Informe o client secret informado pela APIario'),
+  );
+  //Pega o access token salvo
+  $access_token = variable_get('apiario_accesstoken','');
+  //Verifica se foi setado no drupal ou está vazio
+  if($access_token != '') {
+  	//Verifica se expirou o acess token
+    $access_token = checkAccessToken($access_token);
+    //Mostra a apiario no drupal
+    $form['config_inicial']['apiario_accesstoken'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Access Token'),
+      '#default_value' => $access_token,
+      '#size' => 60,
+      '#attributes' => array('disabled' => 'disabled'),
+      '#description' => t('Seu Access Token fornecido pela APIario, expira em uma hora automaticamente'),
+    );        
+  }
+  $form = system_settings_form($form);
+  $form ['#submit'][0] = 'apiario_form_submit';
+  return $form;
+}
+/**
+ * Alterando o envio das configurações
+ **/
+function apiario_form_submit($form, &$form_state) {
+  variable_set('apiario_clientid', $form_state['values']['apiario_clientid']);
+  variable_set('apiario_clientsecret', $form_state['values']['apiario_clientsecret']);
+  drupal_set_message(t('Suas configurações foram salvas com sucesso!'));
+  //Após salvar redireciona para a APIario para solicitar a permissão para pegar o access_token
+  $client = getClient();
+  //Prepara a url para solicitar a autorização e código de acesso
+  $auth_url = $client->getAuthenticationUrl(AUTHORIZATION_ENDPOINT, REDIRECT_URI);
+  //Redireciona para a URL solicitando a autorização
+  header('Location: ' . $auth_url);
+  die('Redirect');  
+}

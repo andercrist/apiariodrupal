@@ -1,0 +1,89 @@
+<?php
+/**
+ * Arquivo onde estão os campos que serão criados na instalação do módulo
+ * @author Anderson Silva
+ * @version 1.0
+ **/
+
+/**
+ * Campos Código e Status
+ * @return array
+ **/
+function _apiario_installed_fields() {
+  //Campo código
+  $fields['apiario_codigo'] = array(
+    'field_name' => 'apiario_codigo',
+    'label' => t('Código do vídeo'),
+    'type' => 'text',
+    'module' => 'text',
+  );
+  //Campo status
+  $fields['apiario_status'] = array(
+    'field_name' => 'apiario_status',
+    'label' => t('Status do vídeo'),
+    'type' => 'text',
+    'module' => 'text',
+  );  
+  return $fields;
+}
+
+/**
+ * Instâncias e configurações
+ * @return array
+ **/
+function _apiario_installed_instances() {
+  //Configuração do campo código
+  $instances['apiario_codigo'] = array(
+    'field_name' => 'apiario_codigo',
+    'type' => 'text',
+    'label' => t('Código do vídeo'),
+    'required' => 1,
+    'widget' => array(
+      'type' => 'text_textfield',
+      'weight' => '-1',
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => -1,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => -1,
+      ),
+    ),
+  );
+  //Configuração do campo Status
+  $instances['apiario_status'] = array(
+    'field_name' => 'apiario_status',
+    'type' => 'text',
+    'label' => t('Status do vídeo'),
+    'widget' => array(
+      'type' => 'text_textfield',
+      'weight' => '-1',
+      'settings' => array(
+        'size' => '20',
+      ),
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => -1,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => -1,
+      ),
+    ),
+  );  
+
+  return $instances;
+}
