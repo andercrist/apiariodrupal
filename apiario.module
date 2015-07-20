@@ -50,6 +50,7 @@ function apiario_form_alter(&$form, &$form_state, $form_id) {
     $form['title'] = '';
     $form['body'] = '';
     $form['apiario_codigo'] = '';
+    $form['apiario_status'] = '';
     $form['actions'] = '';
     return $form;
   }

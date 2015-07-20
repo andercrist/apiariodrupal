@@ -42,8 +42,14 @@ function checkAccessToken($access_token) {
 		$params = array('refresh_token' => variable_get('apiario_refreshtoken',''));
 		$response = $client->getAccessToken(TOKEN_ENDPOINT, 'refresh_token', $params);
 		$info = $response['result'];
-		variable_set('apiario_accesstoken', $info['access_token']);
-		variable_set('apiario_refreshtoken', $info['refresh_token']);
-		return $info['access_token'];
+		if(isset($info['access_token'])) {
+			variable_set('apiario_accesstoken', $info['access_token']);
+			variable_set('apiario_refreshtoken', $info['refresh_token']);
+			return $info['access_token'];
+		} else {
+			drupal_set_message(t('Problemas na autenticação com a APIario, faça novamente as configurações. <a href="/admin/config/apiario/settings">Clique aqui para configurar</a>'), 'error');
+			variable_set('apiario_accesstoken', '');
+      		variable_set('apiario_refreshtoken', '');
+		}
 	} else return $access_token;
 }
