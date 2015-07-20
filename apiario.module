@@ -71,7 +71,7 @@ function apiario_form_alter(&$form, &$form_state, $form_id) {
 
   //Anexa o css do módulo
   $form['#attached']['css'] = array(
-    drupal_get_path('module', 'ajax_example') . 'modules/apiariodrupal/stylesheets/apiario.css'
+    drupal_get_path('module', 'apiario') . '/stylesheets/apiario.css'
   );
   //Anexa o JS do módulo
   $form['#attached']['js'] = array(
