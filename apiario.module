@@ -10,10 +10,14 @@ require_once('apiario.functions');
 
 //Define a URL de retorno para autenticação com a APIario
 define('REDIRECT_URI', 'http://' . $_SERVER['HTTP_HOST'] . '/admin/config/apiario/settings');
+//Define o HOST da APIario, essa constante pode ser alterada conforme a necessidade
+const HOSTAPI = 'http://apartamentosnorio.novo:3001';
 //Define a URL da APIario para autorização
-const AUTHORIZATION_ENDPOINT = 'http://colmeia.aovivonaweb.tv/oauth/authorise';
+define('AUTHORIZATION_ENDPOINT', HOSTAPI . '/oauth/authorise');
 //Define a URL da APIario para receber o token
-const TOKEN_ENDPOINT         = 'http://colmeia.aovivonaweb.tv/oauth/token';
+define('TOKEN_ENDPOINT', HOSTAPI . '/oauth/token');
+//Define o link do UPLOAD
+define('LINK_UPLOAD', HOSTAPI . '/upload');
 //Formato
 const ACCESS_TOKEN_BEARER   = 1;
 
@@ -34,6 +38,20 @@ function apiario_form($node, $form_state) {
 function apiario_form_alter(&$form, &$form_state, $form_id) {
   //Esta não é a forma que estamos procurando
   if ($form_id != 'apiario_node_form') return;
+  //Verifica se está online a APIario
+  $headers = @get_headers( HOSTAPI );
+  //Caso esteja OFF
+  if(!( $headers !== FALSE && strpos( $headers[ 0 ], '200' ) !== FALSE )) {
+    //Mensagem para o usuário que está off
+    drupal_set_message(t('A APIario está offline no momento, aguarde mais alguns instante e tente novamente.'), 'error'); 
+    //Desabilita os campos e botões de envio
+    $form['title'] = '';
+    $form['body'] = '';
+    $form['apiario_codigo'] = '';
+    $form['apiario_status'] = '';
+    $form['actions'] = '';
+    return $form;
+  }
 
   //Pega o access token salvo
   $access_token = variable_get('apiario_accesstoken','');
@@ -42,10 +60,8 @@ function apiario_form_alter(&$form, &$form_state, $form_id) {
   if($access_token != '') {
     $access_token = checkAccessToken($access_token);
   } else {
-
     //Mensagem para o usuário para configurar o módulo
     drupal_set_message(t('Primeiro você precisa configurar e habilitar o módulo nas configurações. <a href="/admin/config/apiario/settings">Clique aqui para configurar</a>'), 'error');   
-
     //Desabilita os campos e botões de envio
     $form['title'] = '';
     $form['body'] = '';
@@ -100,6 +116,14 @@ function apiario_form_alter(&$form, &$form_state, $form_id) {
       'class' => array('apiario_accesstoken')
     )
   );
+  //Adiciona o LINK do Upload
+  $form['link_upload'] = array(
+    '#type' => 'hidden',
+    '#value' => LINK_UPLOAD,
+    '#attributes' => array (
+      'class' => array('apiario_linkupload')
+    )
+  );  
 }
 
 /**

@@ -44,6 +44,8 @@ $(function() {
       }
       //Pega o access_token do formulário
       var accesstoken = $('.apiario_accesstoken').val();
+      //Pega a LINK do Upload
+      var linkupload = $('.apiario_linkupload').val();
       //Caso o access token estiver em branco aborta o envio
       if(accesstoken == '') {
         //Mensagem para o usuário do erro
@@ -65,7 +67,7 @@ $(function() {
         
         var xhr = new XMLHttpRequest();
         //Envia o vídeo para a APIario
-        xhr.open('post', 'http://colmeia.aovivonaweb.tv/upload', true);
+        xhr.open('post', linkupload, true);
         //Seta o access token para enviar o arquivo
         xhr.setRequestHeader('Authorization','Bearer ' + accesstoken);
         //Insere as informações o progress bar
@@ -90,10 +92,10 @@ $(function() {
           $('#edit-apiario-codigo-und-0-value').val(resposta.id);
           //Seta o Status primário do vídeo no Jobs
           $('#edit-apiario-status-und-0-value').val('Processando...');
-          //Esconde o input de Vídeo para não acontecer problemas de repetição
-          $('.form-item-files-video').hide();
+          //Remove o input do vídeo para evitar o envio para o drupal
+          $('.form-item-files-video').remove();
           //Envia a mensagem de enviado com sucesso para o usuário
-          showInfo(this.statusText + '. Vídeo enviado com sucesso!', 'success');
+          showInfo(this.statusText + '. Vídeo enviado com sucesso! Aguarde o drupal salvar o vídeo...', 'success');
           //Habilita o botão salvar
           $('#edit-submit').attr('value', 'Salvar');
           $('#edit-submit').removeAttr('disabled');
