@@ -36,7 +36,8 @@ function checkAccessToken($access_token) {
 	//Define o tipo do token
 	$client->setAccessTokenType(ACCESS_TOKEN_BEARER);
 	//Verifica se está logado corretamente
-	$response = $client->fetch(HOSTAPI + '/logged');
+	$response = $client->fetch(HOSTAPI . '/logged');
+
 	//Verifica se retornou true, caso não tenha retornado precisa atualizar o token
 	if($response['result'] != '1') {
 		$params = array('refresh_token' => variable_get('apiario_refreshtoken',''));

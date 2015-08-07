@@ -11,7 +11,7 @@ require_once('apiario.functions');
 //Define a URL de retorno para autenticação com a APIario
 define('REDIRECT_URI', 'http://' . $_SERVER['HTTP_HOST'] . '/admin/config/apiario/settings');
 //Define o HOST da APIario, essa constante pode ser alterada conforme a necessidade
-const HOSTAPI = 'http://apartamentosnorio.novo:3001';
+const HOSTAPI = 'http://colmeia.aovivonaweb.tv';
 //Define a URL da APIario para autorização
 define('AUTHORIZATION_ENDPOINT', HOSTAPI . '/oauth/authorise');
 //Define a URL da APIario para receber o token
