@@ -5,7 +5,7 @@
  * @version 1.0
  **/
 
-require_once('apiario.oauth');
+require_once('apiario.oauth2');
 require_once('apiario.functions');
 
 //Define a URL de retorno para autenticação com a APIario
@@ -27,6 +27,29 @@ const ACCESS_TOKEN_BEARER   = 1;
 function apiario_form($node, $form_state) {
   return node_content_form($node, $form_state);
 }
+
+/**
+ * Implementar hook_ctools_plugin_api().
+ * @param $owner
+ * @param $api
+ */
+function apiario_ctools_plugin_api($owner, $api) {
+  if ($owner == 'services' && $api == 'services') {
+    return array(
+      'version' => 3,
+      //Arquivo responsável pela configuração do services API
+      'file' => 'apiario.services',
+    );
+  }
+  elseif ($owner == 'oauth_common' && $api == 'oauth') {
+    return array(
+      'version' => 1,
+      //Arquivo responsável pela configuração do services API
+      'file' => 'apiario.oauth',
+    );    
+  }
+}
+
 
 /**
  * Implementar hook_form_alter().
@@ -74,9 +97,11 @@ function apiario_form_alter(&$form, &$form_state, $form_id) {
   //Removendo o botão de visualização
   $form['actions']['preview'] = '';
   //Desabilita o status do Node
-  $form['options']['status']['#default_value'] = 0;
-  $form['options']['status']['#disabled'] = TRUE;
-  $form['options']['status']['#title'] = 'Publicação somente após o retorno da APIario';
+  if (!isset($form['options']['status']['#default_value'])) {  
+    $form['options']['status']['#default_value'] = 0;
+    $form['options']['status']['#attributes'] = array('onclick' => 'return false');
+    $form['options']['status']['#title'] = 'Publicação controlado pela APIario';
+  }
 
   //Configurando o campo código  
   $form['apiario_codigo']['und'][0]['value']['#description'] = t('Código de retorno do envio do vídeo');
@@ -108,6 +133,7 @@ function apiario_form_alter(&$form, &$form_state, $form_id) {
   } else {
     drupal_set_message(t('O Código do envio do vídeo foi recebido com sucesso!'));
   }
+
   //Adiciona o campo access token
   $form['access_token'] = array(
     '#type' => 'hidden',

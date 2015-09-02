@@ -1,0 +1,181 @@
+<?php
+/**
+ * Função responsável para criação do endpoint e configuração da API no drupal
+ * @access public
+ * @return array
+ **/
+function apiario_default_services_endpoint() {
+  $export = array();
+
+  $endpoint = new stdClass();
+  $endpoint->disabled = FALSE; /* Edit this to true to make a default endpoint disabled initially */
+  $endpoint->api_version = 3;
+  $endpoint->name = 'api';
+  $endpoint->server = 'rest_server';
+  $endpoint->path = 'api';
+  $endpoint->authentication = array(
+    'services_oauth' => array(
+      'oauth_context' => 'padrao',
+      'authorization' => 'apiario',
+      'credentials' => 'consumer',
+    ),
+  );
+  $endpoint->server_settings = array(
+    'formatters' => array(
+      'bencode' => TRUE,
+      'json' => TRUE,
+      'jsonp' => TRUE,
+      'php' => TRUE,
+      'rss' => TRUE,
+      'xml' => TRUE,
+    ),
+    'parsers' => array(
+      'application/json' => TRUE,
+      'application/vnd.php.serialized' => TRUE,
+      'application/x-www-form-urlencoded' => TRUE,
+      'application/xml' => TRUE,
+      'multipart/form-data' => TRUE,
+      'text/xml' => TRUE,
+    ),
+  );
+  $endpoint->resources = array(
+    'entity_node' => array(
+      'operations' => array(
+        'retrieve' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+        'update' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+        'index' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+      ),
+    ),
+    'node' => array(
+      'operations' => array(
+        'retrieve' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+        'update' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+        'index' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+      ),
+      'relationships' => array(
+        'files' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+        'comments' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+      ),
+    ),
+    'user' => array(
+      'operations' => array(
+        'retrieve' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => '',
+              'authorization' => '',
+            ),
+          ),
+        ),
+      ),
+      'actions' => array(
+        'login' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services' => array(
+              'resource_api_version' => '1.0',
+            ),
+            'services_oauth' => array(
+              'credentials' => '',
+              'authorization' => '',
+            ),
+          ),
+        ),
+        'logout' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services' => array(
+              'resource_api_version' => '1.0',
+            ),
+            'services_oauth' => array(
+              'credentials' => '',
+              'authorization' => '',
+            ),
+          ),
+        ),
+        'token' => array(
+          'enabled' => '1',
+          'settings' => array(
+            'services_oauth' => array(
+              'credentials' => 'consumer',
+              'authorization' => 'apiario',
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+  $endpoint->debug = 1;
+
+
+
+  $export['api'] = $endpoint;
+
+  return $export;
+}
+?>

@@ -1,0 +1,57 @@
+<?php
+/**
+ * Arquivo que faz a autenticação com a APIario OAUTH V2.0
+ * @author Anderson Silva
+ * @version 1.0
+ **/
+
+require('lib/Client.php');
+require('lib/GrantType/IGrantType.php');
+require('lib/GrantType/AuthorizationCode.php');
+require('lib/GrantType/RefreshToken.php');
+
+/**
+ * Função para retornar o client oauth2 para autenticação
+ * @return obj
+ **/
+function getClient() {
+  $client = null;
+  $clientid = variable_get('apiario_clientid','');
+  $clientsecret = variable_get('apiario_clientsecret','');
+  $client = new OAuth2\Client($clientid, $clientsecret);
+  return $client;  
+}
+
+/**
+ * Checa se o access token já expirou e atualiza automaticamente
+ * @param access_token
+ **/
+function checkAccessToken($access_token) {
+	//Não queremos um access token vazio
+	if(empty($access_token)) return;
+	$client = null;
+	$client = getClient();
+	//Seta o access token
+	$client->setAccessToken($access_token);
+	//Define o tipo do token
+	$client->setAccessTokenType(ACCESS_TOKEN_BEARER);
+	//Verifica se está logado corretamente
+	$response = $client->fetch(HOSTAPI . '/logged');
+
+	//Verifica se retornou true, caso não tenha retornado precisa atualizar o token
+	if($response['result'] != '1') {
+		$params = array('refresh_token' => variable_get('apiario_refreshtoken',''));
+		$response = $client->getAccessToken(TOKEN_ENDPOINT, 'refresh_token', $params);
+		$info = $response['result'];
+
+		if($info != 'Error') {
+			variable_set('apiario_accesstoken', $info['access_token']);
+			variable_set('apiario_refreshtoken', $info['refresh_token']);
+			return $info['access_token'];
+		} else {
+			drupal_set_message(t('Problemas na autenticação com a APIario, faça novamente as configurações. <a href="/admin/config/apiario/settings">Clique aqui para configurar</a>'), 'error');
+			variable_set('apiario_accesstoken', '');
+      		variable_set('apiario_refreshtoken', '');
+		}
+	} else return $access_token;
+}

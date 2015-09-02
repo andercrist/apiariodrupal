@@ -1,4 +1,16 @@
 $(function() {
+
+  var createCORSRequest = function(method, url) {
+    var xhr = new XMLHttpRequest();
+    if ("withCredentials" in xhr) {
+      xhr.open(method, url, true);
+    } else if (typeof XDomainRequest != "undefined") {
+      xhr = new XDomainRequest();
+      xhr.open(method, url);
+    } else xhr = null;
+    return xhr;
+  }
+
   //Mensagens de aviso
   var showInfo = function(message, type) {
     $('div.progress').hide();
@@ -65,9 +77,10 @@ $(function() {
         //Adiciona o arquivo ao formulário criado
         formData.append('video', file);
         
-        var xhr = new XMLHttpRequest();
+        //var xhr = new XMLHttpRequest();
         //Envia o vídeo para a APIario
-        xhr.open('post', linkupload, true);
+        //xhr.open('post', linkupload, true);
+        var xhr = createCORSRequest('POST', linkupload);
         //Seta o access token para enviar o arquivo
         xhr.setRequestHeader('Authorization','Bearer ' + accesstoken);
         //Insere as informações o progress bar

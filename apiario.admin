@@ -5,6 +5,53 @@
  * @version 1.0
  **/
 
+
+
+/**
+ * Função responsável em criar o usuário para acesso a API do drupal
+ **/
+function apiario_createUser() {
+  $nome = 'apiario';
+  $senha = '';
+  $user = user_load_by_name($nome);
+  if(!$user){
+    //Criar papel com permissões para editar os vídeos
+    $apiario_role = new stdClass();
+    $apiario_role->name = $nome;
+    $apiario_role->weight = 2;
+    //Salva o papel
+    user_role_save($apiario_role);
+    //Permissões adicionais
+    user_role_grant_permissions($apiario_role->rid, array(
+      //'administer nodes',
+      'edit any apiario content',
+      //'administer users',
+    ));
+
+    // Cria o usuário com o papel criado
+    $edit = array();
+    $edit['name']   = $nome;
+    $edit['mail']   = 'apiario@aovivonaweb.tv';
+    $edit['roles']  = array($apiario_role->rid => $apiario_role->rid);
+    $edit['pass']   = $senha;
+    $edit['status'] = 1;
+
+    $account = user_save(drupal_anonymous_user(), $edit);
+    
+    $consumer = new DrupalOAuthConsumer(user_password(32), user_password(32), array(
+      'callback_url' => '',
+      'uid' => $account->uid,
+      'provider_consumer' => TRUE,
+    ));
+    $consumer->name = 'apiario';
+    $consumer->context = 'padrao';
+    $consumer->callback_url = 'http://colmeia.aovivonaweb.tv/drupal';
+    // Update or create the consumer.
+    $update = $consumer->in_database;
+    $consumer->write(); 
+  }
+}
+
 /**
  * Formulário das configurações da API
  **/
