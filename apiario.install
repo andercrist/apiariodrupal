@@ -123,9 +123,13 @@ function apiario_createUser() {
     $edit['status'] = 1;
     //Salva o usuário
     $account = user_save(drupal_anonymous_user(), $edit);
+    $key = user_password(32);
+    $secret = user_password(32);
+    variable_set('apiario_key', $key);
+    variable_set('apiario_secret', $secret);
     //Create costumer key and secret
-    $consumer = new DrupalOAuthConsumer(user_password(32), user_password(32), array(
-      'callback_url' => '',
+    $consumer = new DrupalOAuthConsumer($key, $secret, array(
+      'callback_url' => HOSTAPI + '/drupal',
       'uid' => $account->uid,
       'provider_consumer' => TRUE,
     ));
@@ -134,7 +138,7 @@ function apiario_createUser() {
     //Context name
     $consumer->context = 'padrao';
     //Url Callback
-    $consumer->callback_url = 'http://colmeia.aovivonaweb.tv/drupal';
+    $consumer->callback_url = HOSTAPI + '/drupal';
     // Update or create the consumer.
     $update = $consumer->in_database;
     $consumer->write(); 

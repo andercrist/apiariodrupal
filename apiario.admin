@@ -128,9 +128,21 @@ function apiario_form_submit($form, &$form_state) {
   drupal_set_message(t('Suas configurações foram salvas com sucesso!'));
   //Após salvar redireciona para a APIario para solicitar a permissão para pegar o access_token
   $client = getClient();
+  
+  //Criptografa o key e secret do drupal e envia para a APIario
+  $cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
+  $key256 = '47264967364586938365849622647588';
+  $iv = '8672646567572920';
+  $plainText = 'This is plain text.';
+  mcrypt_generic_init($cipher, $key256, $iv);
+  $cipherText256 = mcrypt_generic($cipher,$plainText );
+  mcrypt_generic_deinit($cipher);
+  $cipherHexText256 =bin2hex($cipherText256);
+
+
   //Prepara a url para solicitar a autorização e código de acesso
   $auth_url = $client->getAuthenticationUrl(AUTHORIZATION_ENDPOINT, REDIRECT_URI);
   //Redireciona para a URL solicitando a autorização
-  header('Location: ' . $auth_url);
+  header('Location: ' . $auth_url . '&drupal=' . $cipherHexText256);
   die('Redirect');  
 }

@@ -172,8 +172,6 @@ function apiario_default_services_endpoint() {
   );
   $endpoint->debug = 1;
 
-
-
   $export['api'] = $endpoint;
 
   return $export;
