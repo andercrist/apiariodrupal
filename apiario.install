@@ -125,8 +125,6 @@ function apiario_createUser() {
     $account = user_save(drupal_anonymous_user(), $edit);
     $key = user_password(32);
     $secret = user_password(32);
-    variable_set('apiario_key', $key);
-    variable_set('apiario_secret', $secret);
     //Create costumer key and secret
     $consumer = new DrupalOAuthConsumer($key, $secret, array(
       'callback_url' => HOSTAPI + '/drupal',

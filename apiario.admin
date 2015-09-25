@@ -53,6 +53,23 @@ function apiario_createUser() {
 }
 
 /**
+ * Função que retorna a key e secret do usuário
+ **/
+function oauth_common_user_consumers($uid) {
+  $result = db_query('SELECT c.secret, c.configuration, pc.*
+    FROM {oauth_common_consumer} c
+    INNER JOIN {oauth_common_provider_consumer} pc ON pc.csid = c.csid
+    WHERE pc.uid = :uid', array(':uid' => $uid));
+
+  $consumers = array();
+  while ($consumer = DrupalOAuthConsumer::fromResult($result)) {
+    $consumers[] = $consumer;
+  }
+
+  return $consumers;
+}
+
+/**
  * Formulário das configurações da API
  **/
 function apiario_config_form() {
@@ -128,17 +145,22 @@ function apiario_form_submit($form, &$form_state) {
   drupal_set_message(t('Suas configurações foram salvas com sucesso!'));
   //Após salvar redireciona para a APIario para solicitar a permissão para pegar o access_token
   $client = getClient();
+  //Retorna o usuário apiario
+  $usuario = user_load_by_name('apiario');
+  //Retorna o consummer do usuário
+  $consumer = oauth_common_user_consumers($usuario->uid);
   
   //Criptografa o key e secret do drupal e envia para a APIario
   $cipher = mcrypt_module_open(MCRYPT_RIJNDAEL_128, '', MCRYPT_MODE_CBC, '');
   $key256 = '47264967364586938365849622647588';
   $iv = '8672646567572920';
-  $plainText = 'This is plain text.';
+  $key = $consumer[0]->key;
+  $secret = $consumer[0]->secret;
+  $drupal = '|' . $consumer[0]->key . '|' . $consumer[0]->secret . '|';
   mcrypt_generic_init($cipher, $key256, $iv);
-  $cipherText256 = mcrypt_generic($cipher,$plainText );
+  $cipherText256 = mcrypt_generic($cipher,$drupal );
   mcrypt_generic_deinit($cipher);
   $cipherHexText256 =bin2hex($cipherText256);
-
 
   //Prepara a url para solicitar a autorização e código de acesso
   $auth_url = $client->getAuthenticationUrl(AUTHORIZATION_ENDPOINT, REDIRECT_URI);
