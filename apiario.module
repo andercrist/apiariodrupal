@@ -61,6 +61,8 @@ function apiario_ctools_plugin_api($owner, $api) {
 function apiario_form_alter(&$form, &$form_state, $form_id) {
   //Esta não é a forma que estamos procurando
   if ($form_id != 'apiario_node_form') return;
+  $node = $form_state['node'];
+
   //Verifica se está online a APIario
   $headers = @get_headers( HOSTAPI );
   //Caso esteja OFF
@@ -90,22 +92,34 @@ function apiario_form_alter(&$form, &$form_state, $form_id) {
     $form['body'] = '';
     $form['apiario_codigo'] = '';
     $form['apiario_status'] = '';
+    $form['apiario_url_video'] = '';
     $form['actions'] = '';
     return $form;
   }
 
   //Removendo o botão de visualização
   $form['actions']['preview'] = '';
-  //Desabilita o status do Node
-  if (!isset($form['options']['status']['#default_value'])) {  
-    $form['options']['status']['#default_value'] = 0;
-    $form['options']['status']['#attributes'] = array('onclick' => 'return false');
-    $form['options']['status']['#title'] = 'Publicação controlado pela APIario';
+  //Verifica se é novo ou é edição
+  if (!isset($node->nid) || isset($node->is_new)) {
+      $form['options']['status']['#default_value'] = 0;
+      $form['options']['status']['#attributes'] = array('onclick' => 'return false');
+      $form['options']['status']['#title'] = 'Publicação controlado pela APIario';
+  } else {
+    //Desabilita o status do Node
+    if ($form['apiario_status']['und']['0']['value']['#default_value'] != 'Concluído com sucesso!') {  
+      $form['options']['status']['#default_value'] = 0;
+      $form['options']['status']['#attributes'] = array('onclick' => 'return false');
+      $form['options']['status']['#title'] = 'Publicação controlado pela APIario';
+    }    
   }
 
   //Configurando o campo código  
   $form['apiario_codigo']['und'][0]['value']['#description'] = t('Código de retorno do envio do vídeo');
   $form['apiario_codigo']['und'][0]['value']['#attributes'] = array('readonly' => 'readonly');
+
+  //Configurando o campo URL Vídeo
+  $form['apiario_url_video']['und'][0]['value']['#description'] = t('URL do vídeo concluído');
+  $form['apiario_url_video']['und'][0]['value']['#attributes'] = array('readonly' => 'readonly');
 
   //Configurando o campo status
   $form['apiario_status']['und'][0]['value']['#description'] = t('Status do vídeo na APIario');

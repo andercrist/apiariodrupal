@@ -109,9 +109,10 @@ function apiario_createUser() {
     user_role_save($apiario_role);
     //Permissões adicionais
     user_role_grant_permissions($apiario_role->rid, array(
-      //'administer nodes',
       'edit any apiario content',
-      //'administer users',
+      'edit own apiario content',
+      'bypass node access',
+      'administer nodes',
     ));
 
     // Cria o usuário com o papel criado
@@ -119,7 +120,7 @@ function apiario_createUser() {
     $edit['name']   = $nome;
     $edit['mail']   = 'apiario@aovivonaweb.tv';
     $edit['roles']  = array($apiario_role->rid => $apiario_role->rid);
-    $edit['pass']   = $senha;
+    $edit['pass']   = user_password(32);
     $edit['status'] = 1;
     //Salva o usuário
     $account = user_save(drupal_anonymous_user(), $edit);

@@ -24,6 +24,13 @@ function _apiario_installed_fields() {
     'type' => 'text',
     'module' => 'text',
   );  
+  //Campo URL Vídeo
+  $fields['apiario_url_video'] = array(
+    'field_name' => 'apiario_url_video',
+    'label' => t('Url do Vídeo'),
+    'type' => 'text',
+    'module' => 'text',
+  );  
   return $fields;
 }
 
@@ -84,6 +91,32 @@ function _apiario_installed_instances() {
       ),
     ),
   );  
-
+  //Configuração do campo URL Vídeo
+  $instances['apiario_url_video'] = array(
+    'field_name' => 'apiario_url_video',
+    'type' => 'text',
+    'label' => t('URL do vídeo'),
+    'widget' => array(
+      'type' => 'text_textfield',
+      'weight' => '-1',
+      'settings' => array(
+        'size' => '20',
+      ),
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'inline',
+        'settings' => array(),
+        'type' => 'text_default',
+        'weight' => -1,
+      ),
+      'teaser' => array(
+        'label' => 'above',
+        'settings' => array(),
+        'type' => 'hidden',
+        'weight' => -1,
+      ),
+    ),
+  ); 
   return $instances;
 }
