@@ -1,0 +1,10 @@
+.container[data-container] {
+  position: absolute;
+  background-color: black;
+  height: 100%;
+  width: 100%;
+}
+
+[data-player]:not(.nocursor) .container[data-container].pointer-enabled {
+	cursor: pointer;
+}
